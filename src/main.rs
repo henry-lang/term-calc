@@ -1,8 +1,10 @@
 mod tokenizer;
 mod parser;
+mod traverse;
 
 use crate::tokenizer::tokenize;
 use crate::parser::Parser;
+use crate::traverse::traverse;
 
 use std::io::{self, Write};
     
@@ -20,13 +22,17 @@ fn main() -> io::Result<()> {
         }
 
         let tokens = tokenize(&expression).unwrap();
-        println!("{:?}", tokens);
+        // println!("{:?}", tokens);
         if tokens.is_empty() {
             continue
         }
 
         let mut parser = Parser::new(tokens);
-        println!("{:?}", parser.get_expression());
+        let node = parser.get_expression();
+        // println!("{:?}", parser.get_expression());
+        
+        let value = traverse(node);
+        println!("{}", value);
     }
 
     Ok(())
