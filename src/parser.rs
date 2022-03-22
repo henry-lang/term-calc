@@ -95,18 +95,18 @@ impl Parser {
     }
 
     fn get_term(&mut self) -> Box<Node> {
-        let factor = self.get_factor();
+        let mut factor = self.get_factor();
 
         while [TimesSign, DivideSign].contains(&self.token().token_type) {
             match self.token().token_type {
                 TimesSign => {
                     self.consume(TimesSign);
-                    return Box::new(Node::BinaryOp{op_type: BinaryOpType::Multiply, lhs: factor, rhs: self.get_factor()});
+                    factor = Box::new(Node::BinaryOp{op_type: BinaryOpType::Multiply, lhs: factor, rhs: self.get_factor()});
                 },
 
                 DivideSign => {
                     self.consume(DivideSign);
-                    return Box::new(Node::BinaryOp{op_type: BinaryOpType::Divide, lhs: factor, rhs: self.get_factor()});
+                    factor = Box::new(Node::BinaryOp{op_type: BinaryOpType::Divide, lhs: factor, rhs: self.get_factor()});
                 },
 
                 _ => { panic!() }
@@ -117,18 +117,18 @@ impl Parser {
     }
 
     pub fn get_expression(&mut self) -> Box<Node> {
-        let term = self.get_term();
+        let mut term = self.get_term();
 
         while [PlusSign, MinusSign].contains(&self.token().token_type) {
             match self.token().token_type {
                 PlusSign => {
                     self.consume(PlusSign);
-                    return Box::new(Node::BinaryOp{op_type: BinaryOpType::Add, lhs: term, rhs: self.get_term()})
+                    term = Box::new(Node::BinaryOp{op_type: BinaryOpType::Add, lhs: term, rhs: self.get_term()})
                 },
 
                 MinusSign => {
                     self.consume(MinusSign);
-                    return Box::new(Node::BinaryOp{op_type: BinaryOpType::Subtract, lhs: term, rhs: self.get_term()})
+                    term = Box::new(Node::BinaryOp{op_type: BinaryOpType::Subtract, lhs: term, rhs: self.get_term()})
                 },
 
                 _ => { panic!() }
