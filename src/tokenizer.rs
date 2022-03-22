@@ -4,6 +4,7 @@ pub enum TokenType {
     MinusSign,
     TimesSign,
     DivideSign,
+    PowerSign,
     
     OpenParen,
     CloseParen,
@@ -50,8 +51,9 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
             tokens.push(match c {
                 '+' => Token::new(PlusSign),
                 '-' => Token::new(MinusSign),
-                '*' => Token::new(TimesSign),
+                '*' => if let Some(_) = iter.next_if(|(_, next)| *next == c) { Token::new(PowerSign) } else { Token::new(TimesSign) }
                 '/' => Token::new(DivideSign),
+                '^' => Token::new(PowerSign),
                 '(' => Token::new(OpenParen),
                 ')' => Token::new(CloseParen),
                 _ => continue
@@ -60,4 +62,4 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
     }
     
     Some(tokens)
-}
+ }

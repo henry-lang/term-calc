@@ -20,7 +20,7 @@ pub enum BinaryOpType {
     Add,
     Subtract,
     Multiply,
-    Divide
+    Divide,
 }
 
 type ChildNode = Box<Node>;
@@ -90,7 +90,7 @@ impl Parser {
                 Box::new(Node::UnaryOp{op_type: UnaryOpType::Negate, operand: factor})
             }
 
-            _ => { panic!("Expected number or opening parentheses.") }
+            _ => { panic!("Expected (+/-) number or opening parentheses.") }
         }
     }
 
