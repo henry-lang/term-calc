@@ -1,5 +1,5 @@
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub enum TokenType {
+#[derive(Clone, PartialEq, Debug)]
+pub enum Token {
     PlusSign,
     MinusSign,
     TimesSign,
@@ -9,33 +9,11 @@ pub enum TokenType {
     OpenParen,
     CloseParen,
 
-    NumLiteral,
-    NameLiteral, // Function name
+    NumLiteral(f64),
+    NameLiteral(String) // Function name
 }
 
-use TokenType::*;
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct Token {
-    pub token_type: TokenType,
-    pub value: Option<f64>,
-}
-
-impl Token {
-    fn new(token_type: TokenType) -> Self {
-        Self {
-            token_type,
-            value: None,
-        }
-    }
-
-    fn new_with_value(token_type: TokenType, value: f64) -> Self {
-        Self {
-            token_type,
-            value: Some(value),
-        }
-    }
-}
+use Token::*;
 
 pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
     let filtered = expression.split_whitespace().collect::<String>();
@@ -43,36 +21,48 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
 
     let mut iter = filtered.chars().enumerate().peekable();
     while let Some((idx, c)) = iter.next() {
-        if c.is_numeric() {
-            let mut end_idx = idx + 1;
-            while let Some(_) = iter.next_if(|(_, next)| next.is_numeric() || *next == '.') {
-                end_idx += 1;
-            }
-
-            let value = filtered[idx..end_idx]
-                .parse::<f64>()
-                .expect("number is valid");
-
-            tokens.push(Token::new_with_value(NumLiteral, value));
-        } else {
-            tokens.push(match c {
-                '+' => Token::new(PlusSign),
-                '-' => Token::new(MinusSign),
-                '*' => {
-                    if let Some(_) = iter.next_if(|(_, next)| *next == c) {
-                        Token::new(PowerSign)
-                    } else {
-                        Token::new(TimesSign)
-                    }
+        tokens.push(match c {
+            '+' => PlusSign,
+            '-' => MinusSign,
+            '*' => {
+                if let Some(_) = iter.next_if(|(_, next)| *next == c) {
+                    PowerSign
+                } else {
+                    TimesSign
                 }
-                '/' => Token::new(DivideSign),
-                '^' => Token::new(PowerSign),
-                '(' => Token::new(OpenParen),
-                ')' => Token::new(CloseParen),
-                _ => continue,
-            });
-        }
-    }
+            }
+            '/' => DivideSign,
+            '^' => PowerSign,
+            '(' => OpenParen,
+            ')' => CloseParen,
+            _ => {
+                if c.is_numeric() {
+                    let mut end_idx = idx + 1;
+                    while let Some(_) = iter.next_if(|(_, next)| next.is_numeric() || *next == '.') {
+                        end_idx += 1;
+                    }
 
+                    let value = filtered[idx..end_idx]
+                        .parse::<f64>()
+                        .expect("number is valid");
+
+                    NumLiteral(value)
+                } else if c.is_alphabetic() {
+                    let mut end_idx = idx + 1;
+                    while let Some(_) = iter.next_if(|(_, next)| next.is_alphabetic() || *next == '_') {
+                        end_idx += 1;
+                    }
+
+                    let value = filtered[idx..end_idx]
+                        .to_string();
+                    
+                    NameLiteral(value)
+                } else {
+                    panic!("Unexpected character {}", c);
+                }
+            }
+        });
+    }
+    
     Some(tokens)
 }

@@ -1,10 +1,12 @@
 mod parser;
 mod tokenizer;
 mod traverse;
+mod functions;
 
 use crate::parser::Parser;
 use crate::tokenizer::tokenize;
 use crate::traverse::traverse;
+use crate::functions::get_registry;
 
 use std::io::{self, Write};
 
@@ -12,6 +14,7 @@ fn main() -> io::Result<()> {
     let stdin = io::stdin();
 
     let mut debug = false;
+    let registry = get_registry();
 
     loop {
         print!("calc > ");
@@ -39,7 +42,7 @@ fn main() -> io::Result<()> {
             continue;
         }
 
-        let mut parser = Parser::new(tokens);
+        let mut parser = Parser::new(tokens, &registry);
         let node = parser.get_expression();
 
         if debug {

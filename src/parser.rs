@@ -1,13 +1,13 @@
-use crate::tokenizer::{Token, TokenType};
-use TokenType::*;
+use crate::{tokenizer::Token::{self, *}, functions::{Function, FunctionRegistry}};
 
 /*
 GRAMMAR:
 expr: term ((+ | -) term)*
 term: power ((* | /) power)*
 power: factor ((^) factor)*
-factor: NUMBER |
-        OPENPAREN expr CLOSEPAREN |
+factor: NumLiteral |
+        OpenParen expr CloseParen |
+        NameLiteral OpenParen expr CloseParen |
         (-) factor
 */
 
@@ -41,44 +41,62 @@ pub enum Node {
         lhs: ChildNode,
         rhs: ChildNode,
     },
+
+    FunctionCall {
+        func: Function,
+        arg: ChildNode
+    }
 }
 
-pub struct Parser {
+pub struct Parser<'a> {
     current: usize,
     tokens: Vec<Token>,
+    registry: &'a FunctionRegistry,
 }
 
-impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Self {
-        Self { current: 0, tokens }
+impl<'a> Parser<'a> {
+    pub fn new(tokens: Vec<Token>, registry: &'a FunctionRegistry) -> Self {
+        Self { current: 0, registry, tokens }
     }
 
-    pub fn token(&self) -> Token {
-        self.tokens[self.current]
+    pub fn token(&self) -> &Token {
+        &self.tokens[self.current]
     }
 
-    fn consume(&mut self, token_type: TokenType) {
-        if token_type == self.token().token_type {
+    fn consume(&mut self, token: Token) {
+        if match (&token, self.token()) {
+            (NumLiteral(_), NumLiteral(_)) => true,
+            (NameLiteral(_), NameLiteral(_)) => true,
+            _ => &token == self.token()
+        } {
             if self.current + 1 < self.tokens.len() {
                 self.current += 1
             }
         } else {
             panic!(
                 "\x1b[31mExpected {:?}, found {:?}\x1b[0m",
-                token_type,
-                self.token()
+                self.token(),
+                token,
             );
         }
     }
 
     fn get_factor(&mut self) -> Box<Node> {
-        let token_type = self.token().token_type;
-        match token_type {
-            NumLiteral => {
-                let value = self.token().value.unwrap();
-                self.consume(NumLiteral);
+        match self.token() {
+            &NumLiteral(value) => {
+                self.consume(NumLiteral(0.0));
 
                 Box::new(Node::Number(value))
+            }
+
+            NameLiteral(value) => {
+                let func = *self.registry.get(value).expect("function is valid");
+                self.consume(NameLiteral(String::new()));
+                self.consume(OpenParen);
+                let arg = self.get_expression();
+                self.consume(CloseParen);
+                
+                Box::new(Node::FunctionCall{func, arg})
             }
 
             OpenParen => {
@@ -108,7 +126,7 @@ impl Parser {
     fn get_power(&mut self) -> Box<Node> {
         let mut factor = self.get_factor();
 
-        while self.token().token_type == PowerSign {
+        while *self.token() == PowerSign {
             self.consume(PowerSign);
             factor = Box::new(Node::BinaryOp {
                 op_type: BinaryOpType::Power,
@@ -123,31 +141,31 @@ impl Parser {
     fn get_term(&mut self) -> Box<Node> {
         let mut power = self.get_power();
 
-        while [TimesSign, DivideSign].contains(&self.token().token_type) {
-            match self.token().token_type {
-                TimesSign => {
-                    self.consume(TimesSign);
-                    power = Box::new(Node::BinaryOp {
-                        op_type: BinaryOpType::Multiply,
-                        lhs: power,
-                        rhs: self.get_power(),
-                    });
-                }
-
-                DivideSign => {
-                    self.consume(DivideSign);
-                    power = Box::new(Node::BinaryOp {
-                        op_type: BinaryOpType::Divide,
-                        lhs: power,
-                        rhs: self.get_power(),
-                    });
-                }
-
-                _ => {
-                    panic!()
-                }
+        while match self.token() {
+            TimesSign => {
+                self.consume(TimesSign);
+                power = Box::new(Node::BinaryOp {
+                    op_type: BinaryOpType::Multiply,
+                    lhs: power,
+                    rhs: self.get_power(),
+                });
+                true
             }
-        }
+
+            DivideSign => {
+                self.consume(DivideSign);
+                power = Box::new(Node::BinaryOp {
+                    op_type: BinaryOpType::Divide,
+                    lhs: power,
+                    rhs: self.get_power(),
+                });
+                true
+            }
+
+            _ => {
+               false 
+            }
+        }{}
 
         power
     }
@@ -155,8 +173,8 @@ impl Parser {
     pub fn get_expression(&mut self) -> Box<Node> {
         let mut term = self.get_term();
 
-        while [PlusSign, MinusSign].contains(&self.token().token_type) {
-            match self.token().token_type {
+        while [PlusSign, MinusSign].contains(&self.token()) {
+            match self.token() {
                 PlusSign => {
                     self.consume(PlusSign);
                     term = Box::new(Node::BinaryOp {
