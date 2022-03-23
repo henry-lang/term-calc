@@ -1,12 +1,12 @@
+mod functions;
 mod parser;
 mod tokenizer;
 mod traverse;
-mod functions;
 
+use crate::functions::get_registry;
 use crate::parser::Parser;
 use crate::tokenizer::tokenize;
 use crate::traverse::traverse;
-use crate::functions::get_registry;
 
 use std::io::{self, Write};
 

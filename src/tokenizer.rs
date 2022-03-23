@@ -10,7 +10,7 @@ pub enum Token {
     CloseParen,
 
     NumLiteral(f64),
-    NameLiteral(String) // Function name
+    NameLiteral(String), // Function name
 }
 
 use Token::*;
@@ -38,7 +38,8 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
             _ => {
                 if c.is_numeric() {
                     let mut end_idx = idx + 1;
-                    while let Some(_) = iter.next_if(|(_, next)| next.is_numeric() || *next == '.') {
+                    while let Some(_) = iter.next_if(|(_, next)| next.is_numeric() || *next == '.')
+                    {
                         end_idx += 1;
                     }
 
@@ -49,13 +50,14 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
                     NumLiteral(value)
                 } else if c.is_alphabetic() {
                     let mut end_idx = idx + 1;
-                    while let Some(_) = iter.next_if(|(_, next)| next.is_alphabetic() || *next == '_') {
+                    while let Some(_) =
+                        iter.next_if(|(_, next)| next.is_alphabetic() || *next == '_')
+                    {
                         end_idx += 1;
                     }
 
-                    let value = filtered[idx..end_idx]
-                        .to_string();
-                    
+                    let value = filtered[idx..end_idx].to_string();
+
                     NameLiteral(value)
                 } else {
                     panic!("Unexpected character {}", c);
@@ -63,6 +65,6 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
             }
         });
     }
-    
+
     Some(tokens)
 }

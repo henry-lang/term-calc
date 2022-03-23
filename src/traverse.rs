@@ -26,7 +26,7 @@ pub fn traverse(node: Box<Node>) -> f64 {
 
         FunctionCall { func, arg } => {
             let arg = traverse(arg);
-            
+
             func(arg)
         }
     };

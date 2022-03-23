@@ -1,4 +1,7 @@
-use crate::{tokenizer::Token::{self, *}, functions::{Function, FunctionRegistry}};
+use crate::{
+    functions::{Function, FunctionRegistry},
+    tokenizer::Token::{self, *},
+};
 
 /*
 GRAMMAR:
@@ -44,8 +47,8 @@ pub enum Node {
 
     FunctionCall {
         func: Function,
-        arg: ChildNode
-    }
+        arg: ChildNode,
+    },
 }
 
 pub struct Parser<'a> {
@@ -56,7 +59,11 @@ pub struct Parser<'a> {
 
 impl<'a> Parser<'a> {
     pub fn new(tokens: Vec<Token>, registry: &'a FunctionRegistry) -> Self {
-        Self { current: 0, registry, tokens }
+        Self {
+            current: 0,
+            registry,
+            tokens,
+        }
     }
 
     pub fn token(&self) -> &Token {
@@ -67,7 +74,7 @@ impl<'a> Parser<'a> {
         if match (&token, self.token()) {
             (NumLiteral(_), NumLiteral(_)) => true,
             (NameLiteral(_), NameLiteral(_)) => true,
-            _ => &token == self.token()
+            _ => &token == self.token(),
         } {
             if self.current + 1 < self.tokens.len() {
                 self.current += 1
@@ -95,8 +102,8 @@ impl<'a> Parser<'a> {
                 self.consume(OpenParen);
                 let arg = self.get_expression();
                 self.consume(CloseParen);
-                
-                Box::new(Node::FunctionCall{func, arg})
+
+                Box::new(Node::FunctionCall { func, arg })
             }
 
             OpenParen => {
@@ -162,10 +169,8 @@ impl<'a> Parser<'a> {
                 true
             }
 
-            _ => {
-               false 
-            }
-        }{}
+            _ => false,
+        } {}
 
         power
     }
