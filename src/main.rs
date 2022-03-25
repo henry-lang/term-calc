@@ -1,9 +1,9 @@
-mod functions;
+mod identifiers;
 mod parser;
 mod tokenizer;
 mod traverse;
 
-use crate::functions::get_registry;
+use crate::identifiers::Identifiers;
 use crate::parser::Parser;
 use crate::tokenizer::tokenize;
 use crate::traverse::traverse;
@@ -14,12 +14,12 @@ fn main() -> io::Result<()> {
     let stdin = io::stdin();
 
     let mut debug = false;
-    let registry = get_registry();
+    let identifiers = Identifiers::get();
 
     loop {
         print!("calc > ");
         io::stdout().flush()?;
-        let mut expression: String = String::new();
+        let mut expression = String::new();
 
         stdin.read_line(&mut expression)?;
         match expression.trim() {
@@ -42,7 +42,7 @@ fn main() -> io::Result<()> {
             continue;
         }
 
-        let mut parser = Parser::new(tokens, &registry);
+        let mut parser = Parser::new(tokens, &identifiers);
         let node = parser.get_expression();
 
         if debug {

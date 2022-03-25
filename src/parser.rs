@@ -1,5 +1,5 @@
 use crate::{
-    functions::{Function, FunctionRegistry},
+    identifiers::{Function, Constant, Identifiers, self},
     tokenizer::Token::{self, *},
 };
 
@@ -54,20 +54,24 @@ pub enum Node {
 pub struct Parser<'a> {
     current: usize,
     tokens: Vec<Token>,
-    registry: &'a FunctionRegistry,
+    identifiers: &'a Identifiers,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(tokens: Vec<Token>, registry: &'a FunctionRegistry) -> Self {
+    pub fn new(tokens: Vec<Token>, identifiers: &'a Identifiers) -> Self {
         Self {
             current: 0,
-            registry,
             tokens,
+            identifiers
         }
     }
 
     pub fn token(&self) -> &Token {
         &self.tokens[self.current]
+    }
+
+    pub fn peek(&self) -> &Token {
+        &self.tokens[self.current + 1]
     }
 
     fn consume(&mut self, token: Token) {
@@ -89,21 +93,27 @@ impl<'a> Parser<'a> {
     }
 
     fn get_factor(&mut self) -> Box<Node> {
-        match self.token() {
-            &NumLiteral(value) => {
+        match &self.tokens[self.current] {
+            NumLiteral(value) => {
                 self.consume(NumLiteral(0.0));
 
-                Box::new(Node::Number(value))
+                Box::new(Node::Number(*value))
             }
 
             NameLiteral(value) => {
-                let func = *self.registry.get(value).expect("function is valid");
-                self.consume(NameLiteral(String::new()));
-                self.consume(OpenParen);
-                let arg = self.get_expression();
-                self.consume(CloseParen);
-
-                Box::new(Node::FunctionCall { func, arg })
+                match self.peek() {
+                    OpenParen => {
+                        self.consume(NameLiteral(String::new()));
+                        self.consume(OpenParen);
+                        let func = *self.identifiers.get_func(&value).expect("function is valid");
+                        Box::new(Node::FunctionCall { func, arg: self.get_expression() })
+                    }
+                    
+                    _ => {
+                        let constant = *self.identifiers.get_constant(&value).expect("constant is valid");
+                        Box::new(Node::Number(constant))
+                    }
+                }
             }
 
             OpenParen => {
