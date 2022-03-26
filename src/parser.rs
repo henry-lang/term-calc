@@ -1,5 +1,5 @@
 use crate::{
-    identifiers::{Function, Constant, Identifiers, self},
+    identifiers::{self, Constant, Function, Identifiers},
     tokenizer::Token::{self, *},
 };
 
@@ -62,7 +62,7 @@ impl<'a> Parser<'a> {
         Self {
             current: 0,
             tokens,
-            identifiers
+            identifiers,
         }
     }
 
@@ -100,21 +100,28 @@ impl<'a> Parser<'a> {
                 Box::new(Node::Number(*value))
             }
 
-            NameLiteral(value) => {
-                match self.peek() {
-                    OpenParen => {
-                        self.consume(NameLiteral(String::new()));
-                        self.consume(OpenParen);
-                        let func = *self.identifiers.get_func(&value).expect("function is valid");
-                        Box::new(Node::FunctionCall { func, arg: self.get_expression() })
-                    }
-                    
-                    _ => {
-                        let constant = *self.identifiers.get_constant(&value).expect("constant is valid");
-                        Box::new(Node::Number(constant))
-                    }
+            NameLiteral(value) => match self.peek() {
+                OpenParen => {
+                    self.consume(NameLiteral(String::new()));
+                    self.consume(OpenParen);
+                    let func = *self
+                        .identifiers
+                        .get_func(&value)
+                        .expect("function is valid");
+                    Box::new(Node::FunctionCall {
+                        func,
+                        arg: self.get_expression(),
+                    })
                 }
-            }
+
+                _ => {
+                    let constant = *self
+                        .identifiers
+                        .get_constant(&value)
+                        .expect("constant is valid");
+                    Box::new(Node::Number(constant))
+                }
+            },
 
             OpenParen => {
                 self.consume(OpenParen);

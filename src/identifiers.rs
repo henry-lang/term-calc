@@ -5,12 +5,15 @@ pub type Constant = f64;
 
 pub struct Identifiers {
     funcs: HashMap<String, Function>,
-    constants: HashMap<String, Constant> 
+    constants: HashMap<String, Constant>,
 }
 
 impl Identifiers {
     pub fn get() -> Self {
-        let mut it = Identifiers{funcs: HashMap::new(), constants: HashMap::new()};
+        let mut it = Identifiers {
+            funcs: HashMap::new(),
+            constants: HashMap::new(),
+        };
 
         it.funcs.insert("sin".into(), f64::sin);
         it.funcs.insert("cos".into(), f64::cos);
