@@ -108,10 +108,9 @@ impl<'a> Parser<'a> {
                         .identifiers
                         .get_func(&value)
                         .expect("function is valid");
-                    Box::new(Node::FunctionCall {
-                        func,
-                        arg: self.get_expression(),
-                    })
+                    let arg = self.get_expression();
+                    self.consume(CloseParen);
+                    Box::new(Node::FunctionCall { func, arg })
                 }
 
                 _ => {
