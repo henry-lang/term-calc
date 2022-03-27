@@ -70,8 +70,8 @@ impl<'a> Parser<'a> {
         &self.tokens[self.current]
     }
 
-    pub fn peek(&self) -> &Token {
-        &self.tokens[self.current + 1]
+    pub fn peek(&self) -> Option<&Token> {
+        self.tokens.get(self.current + 1)
     }
 
     fn consume(&mut self, token: Token) {
@@ -93,15 +93,15 @@ impl<'a> Parser<'a> {
     }
 
     fn get_factor(&mut self) -> Box<Node> {
-        match &self.tokens[self.current] {
+        match self.token().clone() {
             NumLiteral(value) => {
                 self.consume(NumLiteral(0.0));
 
-                Box::new(Node::Number(*value))
+                Box::new(Node::Number(value))
             }
 
             NameLiteral(value) => match self.peek() {
-                OpenParen => {
+                Some(OpenParen) => {
                     self.consume(NameLiteral(String::new()));
                     self.consume(OpenParen);
                     let func = *self
@@ -115,6 +115,7 @@ impl<'a> Parser<'a> {
                 }
 
                 _ => {
+                    self.consume(NameLiteral(String::new()));
                     let constant = *self
                         .identifiers
                         .get_constant(&value)
