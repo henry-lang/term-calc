@@ -6,17 +6,17 @@ mod traverse;
 
 use config::Config;
 
-use crate::identifiers::Identifiers;
-use crate::parser::Parser;
-use crate::tokenizer::tokenize;
-use crate::traverse::traverse;
+use identifiers::Identifiers;
+use parser::Parser;
+use tokenizer::tokenize;
+use traverse::traverse;
 
 use std::io::{self, Write};
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
 
-    let config = Config::load("./config.toml");
+    let config = dbg!(Config::load_or_create("./config.toml"));
     let mut debug = false;
     let identifiers = Identifiers::get();
 

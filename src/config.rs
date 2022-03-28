@@ -4,10 +4,9 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all(serialize = "lowercase", deserialize = "lowercase"))]
 pub enum Mode {
-    #[serde(alias = "radians")]
     Radians,
-    #[serde(alias = "degrees")]
     Degrees,
 }
 
@@ -19,10 +18,16 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load(path: impl AsRef<Path>) -> Config {
-        let config: Config =
-            toml::from_str(&fs::read_to_string(&path).unwrap_or_else(|_| "".into())).unwrap();
-        dbg!(config)
+    pub fn load_or_create(path: impl AsRef<Path>) -> Config {
+        match fs::read_to_string(&path) {
+            Ok(data) => toml::from_str::<Config>(&data).unwrap(),
+
+            Err(_) => {
+                let default_toml = toml::to_string(&Self::default()).unwrap();
+                let _ = fs::write(&path, default_toml); // If the config doesn't save it really doesn't matter.
+                Self::default()
+            }
+        }
     }
 }
 
