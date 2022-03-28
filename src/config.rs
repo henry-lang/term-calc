@@ -13,20 +13,15 @@ pub enum Mode {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Config {
-    mode: Mode,
-    debug: bool,
+    pub mode: Mode,
+    pub debug: bool,
 }
 
 impl Config {
-    pub fn load_or_create(path: impl AsRef<Path>) -> Config {
+    pub fn load(path: impl AsRef<Path>) -> Config {
         match fs::read_to_string(&path) {
             Ok(data) => toml::from_str::<Config>(&data).unwrap(),
-
-            Err(_) => {
-                let default_toml = toml::to_string(&Self::default()).unwrap();
-                let _ = fs::write(&path, default_toml); // If the config doesn't save it really doesn't matter.
-                Self::default()
-            }
+            Err(_) => Self::default(),
         }
     }
 }

@@ -11,13 +11,22 @@ use parser::Parser;
 use tokenizer::tokenize;
 use traverse::traverse;
 
-use std::io::{self, Write};
+use std::{
+    io::{self, Write},
+    path::PathBuf,
+};
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
+    let config = Config::load(
+        [
+            home::home_dir().expect("home directory"),
+            "term-calc.config.toml".into(),
+        ]
+        .iter()
+        .collect::<PathBuf>(),
+    );
 
-    let config = dbg!(Config::load_or_create("./config.toml"));
-    let mut debug = false;
     let identifiers = Identifiers::get();
 
     loop {
@@ -28,17 +37,12 @@ fn main() -> io::Result<()> {
         stdin.read_line(&mut expression)?;
         match expression.trim() {
             "exit" => break,
-            "debug" => {
-                debug = !debug;
-                println!("debug mode {}", debug);
-                continue;
-            }
             _ => (),
         }
 
         let tokens = tokenize(&expression).unwrap();
 
-        if debug {
+        if config.debug {
             println!("Tokens: {:?}", tokens);
         }
 
@@ -49,7 +53,7 @@ fn main() -> io::Result<()> {
         let mut parser = Parser::new(tokens, &identifiers);
         let node = parser.get_expression();
 
-        if debug {
+        if config.debug {
             println!("Node Tree: {:?}", node);
         }
 

@@ -22,6 +22,7 @@ impl Identifiers {
         it.funcs.insert("arccos", f64::acos);
         it.funcs.insert("arctan", f64::atan);
         it.funcs.insert("sqrt", f64::sqrt);
+        it.funcs.insert("round", f64::round);
 
         it.constants.insert("pi", f64::consts::PI);
         it.constants.insert("e", f64::consts::E);
