@@ -15,7 +15,7 @@ pub enum Token {
 
 use Token::*;
 
-pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
+pub fn tokenize(expression: &str) -> Option<Vec<Token>> {
     let filtered = expression.split_whitespace().collect::<String>();
     let mut tokens = Vec::<Token>::new();
 
@@ -25,7 +25,7 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
             '+' => PlusSign,
             '-' => MinusSign,
             '*' => {
-                if let Some(_) = iter.next_if(|(_, next)| *next == c) {
+                if iter.next_if(|(_, next)| *next == c).is_some() {
                     PowerSign
                 } else {
                     TimesSign
@@ -38,7 +38,9 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
             _ => {
                 if c.is_numeric() {
                     let mut end_idx = idx + 1;
-                    while let Some(_) = iter.next_if(|(_, next)| next.is_numeric() || *next == '.')
+                    while iter
+                        .next_if(|(_, next)| next.is_numeric() || *next == '.')
+                        .is_some()
                     {
                         end_idx += 1;
                     }
@@ -50,8 +52,9 @@ pub fn tokenize(expression: &String) -> Option<Vec<Token>> {
                     NumLiteral(value)
                 } else if c.is_alphabetic() {
                     let mut end_idx = idx + 1;
-                    while let Some(_) =
-                        iter.next_if(|(_, next)| next.is_alphabetic() || *next == '_')
+                    while iter
+                        .next_if(|(_, next)| next.is_alphabetic() || *next == '_')
+                        .is_some()
                     {
                         end_idx += 1;
                     }

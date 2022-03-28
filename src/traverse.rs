@@ -3,7 +3,7 @@ use crate::parser::{BinaryOpType, Node, UnaryOpType};
 use Node::*;
 
 pub fn traverse(node: Box<Node>) -> f64 {
-    return match *node {
+    match *node {
         Number(value) => value,
 
         UnaryOp {
@@ -29,5 +29,5 @@ pub fn traverse(node: Box<Node>) -> f64 {
 
             func(arg)
         }
-    };
+    }
 }

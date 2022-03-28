@@ -1,7 +1,10 @@
+mod config;
 mod identifiers;
 mod parser;
 mod tokenizer;
 mod traverse;
+
+use config::Config;
 
 use crate::identifiers::Identifiers;
 use crate::parser::Parser;
@@ -13,6 +16,7 @@ use std::io::{self, Write};
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
 
+    let config = Config::load("./config.toml");
     let mut debug = false;
     let identifiers = Identifiers::get();
 

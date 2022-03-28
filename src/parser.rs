@@ -1,5 +1,5 @@
 use crate::{
-    identifiers::{self, Constant, Function, Identifiers},
+    identifiers::{Function, Identifiers},
     tokenizer::Token::{self, *},
 };
 
@@ -93,6 +93,7 @@ impl<'a> Parser<'a> {
     }
 
     fn get_factor(&mut self) -> Box<Node> {
+        // TODO: Remove .clone() because it's inefficient - probably a micro optimization though.
         match self.token().clone() {
             NumLiteral(value) => {
                 self.consume(NumLiteral(0.0));
@@ -195,7 +196,7 @@ impl<'a> Parser<'a> {
     pub fn get_expression(&mut self) -> Box<Node> {
         let mut term = self.get_term();
 
-        while [PlusSign, MinusSign].contains(&self.token()) {
+        while [PlusSign, MinusSign].contains(self.token()) {
             match self.token() {
                 PlusSign => {
                     self.consume(PlusSign);
