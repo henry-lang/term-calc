@@ -10,12 +10,12 @@ pub enum Token {
     CloseParen,
 
     NumLiteral(f64),
-    NameLiteral(String), // Function name
+    NameLiteral(String), // Function or constant name
 }
 
 use Token::*;
 
-pub fn tokenize(expression: &str) -> Option<Vec<Token>> {
+pub fn tokenize(expression: &str) -> Result<Vec<Token>, String> {
     let filtered = expression.split_whitespace().collect::<String>();
     let mut tokens = Vec::<Token>::new();
 
@@ -45,11 +45,16 @@ pub fn tokenize(expression: &str) -> Option<Vec<Token>> {
                         end_idx += 1;
                     }
 
-                    let value = filtered[idx..end_idx]
-                        .parse::<f64>()
-                        .expect("number is valid");
-
-                    NumLiteral(value)
+                    let value = filtered[idx..end_idx].parse::<f64>();
+                    match value {
+                        Ok(num) => NumLiteral(num),
+                        Err(_) => {
+                            return Err(format!(
+                                "invalid number {}",
+                                filtered[idx..end_idx].to_owned()
+                            ))
+                        }
+                    }
                 } else if c.is_alphabetic() {
                     let mut end_idx = idx + 1;
                     while iter
@@ -63,11 +68,11 @@ pub fn tokenize(expression: &str) -> Option<Vec<Token>> {
 
                     NameLiteral(value)
                 } else {
-                    panic!("Unexpected character {}", c);
+                    return Err(format!("unexpected character {}", c));
                 }
             }
         });
     }
 
-    Some(tokens)
+    Ok(tokens)
 }

@@ -66,11 +66,11 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn token(&self) -> &Token {
+    fn token(&self) -> &Token {
         &self.tokens[self.current]
     }
 
-    pub fn peek(&self) -> Option<&Token> {
+    fn peek(&self) -> Option<&Token> {
         self.tokens.get(self.current + 1)
     }
 

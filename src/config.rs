@@ -18,9 +18,9 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load(path: impl AsRef<Path>) -> Config {
+    pub fn load(path: impl AsRef<Path>) -> Self {
         match fs::read_to_string(&path) {
-            Ok(data) => toml::from_str::<Config>(&data).unwrap(),
+            Ok(data) => toml::from_str::<Self>(&data).unwrap(),
             Err(_) => Self::default(),
         }
     }

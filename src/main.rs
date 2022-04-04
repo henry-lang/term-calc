@@ -5,7 +5,6 @@ mod tokenizer;
 mod traverse;
 
 use config::Config;
-
 use identifiers::Identifiers;
 use parser::Parser;
 use tokenizer::tokenize;
@@ -15,6 +14,32 @@ use std::{
     io::{self, Write},
     path::PathBuf,
 };
+
+pub fn calculate(
+    expression: &str,
+    identifiers: &Identifiers,
+    config: &Config,
+) -> Result<f64, String> {
+    let tokens = tokenize(expression);
+
+    match tokens {
+        Ok(tokens) => {
+            if config.debug {
+                dbg!(&tokens);
+            }
+
+            let mut parser = Parser::new(tokens, identifiers);
+            let node = parser.get_expression();
+            if config.debug {
+                println!("{:?}", node);
+            }
+
+            let value = traverse(node);
+            Ok(value)
+        }
+        Err(msg) => Err(msg),
+    }
+}
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
@@ -35,30 +60,13 @@ fn main() -> io::Result<()> {
         let mut expression = String::new();
 
         stdin.read_line(&mut expression)?;
-        match expression.trim() {
-            "exit" => break,
-            _ => (),
+        if expression.trim() == "exit" {
+            break;
         }
-
-        let tokens = tokenize(&expression).unwrap();
-
-        if config.debug {
-            println!("Tokens: {:?}", tokens);
+        match calculate(&expression, &identifiers, &config) {
+            Ok(value) => println!("{}", value),
+            Err(msg) => println!("Error: {}", msg),
         }
-
-        if tokens.is_empty() {
-            continue;
-        }
-
-        let mut parser = Parser::new(tokens, &identifiers);
-        let node = parser.get_expression();
-
-        if config.debug {
-            println!("Node Tree: {:?}", node);
-        }
-
-        let value = traverse(node);
-        println!("{}", value);
     }
 
     Ok(())
