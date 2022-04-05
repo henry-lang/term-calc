@@ -71,3 +71,62 @@ fn main() -> io::Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::calculate;
+    use crate::Config;
+    use crate::Identifiers;
+    use std::f64;
+
+    #[test]
+    fn decimals() {
+        assert_eq!(
+            calculate("0.5", &Identifiers::get(), &Config::default()).unwrap(),
+            0.5
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_number() {
+        calculate(
+            "3132193.21933.213921.3",
+            &Identifiers::get(),
+            &Config::default(),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn basic_expressions() {
+        assert_eq!(
+            calculate("1 + 2 - 3 - 4", &Identifiers::get(), &Config::default()).unwrap(),
+            -4.0
+        );
+    }
+
+    #[test]
+    fn mixed_expressions() {
+        assert_eq!(
+            calculate("5 * (3 + 4) ^ 2", &Identifiers::get(), &Config::default()).unwrap(),
+            245.0
+        );
+    }
+
+    #[test]
+    fn identifiers() {
+        assert_eq!(
+            calculate("pi", &Identifiers::get(), &Config::default()).unwrap(),
+            f64::consts::PI
+        );
+    }
+
+    #[test]
+    fn functions() {
+        assert_eq!(
+            calculate("sin(2 * 5)", &Identifiers::get(), &Config::default()).unwrap(),
+            f64::sin(10.0)
+        );
+    }
+}
