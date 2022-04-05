@@ -52,7 +52,7 @@ fn main() -> io::Result<()> {
         .collect::<PathBuf>(),
     );
 
-    let identifiers = Identifiers::get();
+    let identifiers = Identifiers::get(&config);
 
     loop {
         print!("calc > ");
@@ -74,59 +74,46 @@ fn main() -> io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::calculate;
     use crate::Config;
     use crate::Identifiers;
     use std::f64;
 
+    fn run_default(expression: &str) -> Result<f64, String> {
+        crate::calculate(
+            expression,
+            &Identifiers::get(&Config::default()),
+            &Config::default(),
+        )
+    }
+
     #[test]
     fn decimals() {
-        assert_eq!(
-            calculate("0.5", &Identifiers::get(), &Config::default()).unwrap(),
-            0.5
-        );
+        assert_eq!(run_default("0.5").unwrap(), 0.5);
     }
 
     #[test]
     #[should_panic]
     fn invalid_number() {
-        calculate(
-            "3132193.21933.213921.3",
-            &Identifiers::get(),
-            &Config::default(),
-        )
-        .unwrap();
+        run_default("3132193.21933.213921.3").unwrap();
     }
 
     #[test]
     fn basic_expressions() {
-        assert_eq!(
-            calculate("1 + 2 - 3 - 4", &Identifiers::get(), &Config::default()).unwrap(),
-            -4.0
-        );
+        assert_eq!(run_default("1 + 2 - 3 - 4").unwrap(), -4.0);
     }
 
     #[test]
     fn mixed_expressions() {
-        assert_eq!(
-            calculate("5 * (3 + 4) ^ 2", &Identifiers::get(), &Config::default()).unwrap(),
-            245.0
-        );
+        assert_eq!(run_default("5 * (3 + 4) ^ 2").unwrap(), 245.0);
     }
 
     #[test]
     fn identifiers() {
-        assert_eq!(
-            calculate("pi", &Identifiers::get(), &Config::default()).unwrap(),
-            f64::consts::PI
-        );
+        assert_eq!(run_default("pi").unwrap(), f64::consts::PI);
     }
 
     #[test]
     fn functions() {
-        assert_eq!(
-            calculate("sin(2 * 5)", &Identifiers::get(), &Config::default()).unwrap(),
-            f64::sin(10.0)
-        );
+        assert_eq!(run_default("sin(2 * 5)").unwrap(), f64::sin(10.0));
     }
 }

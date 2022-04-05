@@ -196,31 +196,29 @@ impl<'a> Parser<'a> {
     pub fn get_expression(&mut self) -> Box<Node> {
         let mut term = self.get_term();
 
-        while [PlusSign, MinusSign].contains(self.token()) {
-            match self.token() {
-                PlusSign => {
-                    self.consume(PlusSign);
-                    term = Box::new(Node::BinaryOp {
-                        op_type: BinaryOpType::Add,
-                        lhs: term,
-                        rhs: self.get_term(),
-                    })
-                }
-
-                MinusSign => {
-                    self.consume(MinusSign);
-                    term = Box::new(Node::BinaryOp {
-                        op_type: BinaryOpType::Subtract,
-                        lhs: term,
-                        rhs: self.get_term(),
-                    })
-                }
-
-                _ => {
-                    panic!()
-                }
+        while match self.token() {
+            PlusSign => {
+                self.consume(PlusSign);
+                term = Box::new(Node::BinaryOp {
+                    op_type: BinaryOpType::Add,
+                    lhs: term,
+                    rhs: self.get_term(),
+                });
+                true
             }
-        }
+
+            MinusSign => {
+                self.consume(MinusSign);
+                term = Box::new(Node::BinaryOp {
+                    op_type: BinaryOpType::Subtract,
+                    lhs: term,
+                    rhs: self.get_term(),
+                });
+                true
+            }
+
+            _ => false,
+        } {}
 
         term
     }
