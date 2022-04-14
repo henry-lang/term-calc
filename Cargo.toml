@@ -3,9 +3,17 @@ name = "term-calculator"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+path = "term/src/main.rs"
+name = "term"
 
 [dependencies]
-toml = "0.5.8"
-serde = { version = "1.0.136", features = ["derive"] }
+calculate = {path = "calculate"}
 home = "0.5.3"
+
+[workspace]
+members = [
+    "calculate",
+    "term",
+    #"wasm"
+]
