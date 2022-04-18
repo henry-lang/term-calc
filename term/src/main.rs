@@ -16,7 +16,7 @@ fn main() -> io::Result<()> {
         .collect::<PathBuf>(),
     );
 
-    let identifiers = Identifiers::get(&config);
+    let identifiers = Identifiers::generate(&config);
 
     loop {
         print!("calc > ");

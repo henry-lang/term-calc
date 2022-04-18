@@ -10,6 +10,8 @@ name = "term"
 [dependencies]
 calculate = {path = "calculate"}
 home = "0.5.3"
+toml = "0.5.8"
+serde = {version = "1.0.136", features = ["derive"]}
 
 [workspace]
 members = [

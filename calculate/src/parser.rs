@@ -57,6 +57,8 @@ pub struct Parser<'a> {
     identifiers: &'a Identifiers,
 }
 
+type NodeResult = Result<Box<Node>, String>;
+
 impl<'a> Parser<'a> {
     pub fn new(tokens: Vec<Token>, identifiers: &'a Identifiers) -> Self {
         Self {
@@ -74,7 +76,7 @@ impl<'a> Parser<'a> {
         self.tokens.get(self.current + 1)
     }
 
-    fn consume(&mut self, token: Token) {
+    fn consume(&mut self, token: Token) -> Result<(), String> {
         if match (&token, self.token()) {
             (NumLiteral(_), NumLiteral(_)) => true,
             (NameLiteral(_), NameLiteral(_)) => true,
@@ -84,105 +86,104 @@ impl<'a> Parser<'a> {
                 self.current += 1
             }
         } else {
-            panic!(
+            return Err(format!(
                 "\x1b[31mExpected {:?}, found {:?}\x1b[0m",
-                self.token(),
                 token,
-            );
+                self.token()
+            ));
         }
+        Ok(())
     }
 
-    fn get_factor(&mut self) -> Box<Node> {
+    fn get_factor(&mut self) -> NodeResult {
         // TODO: Remove .clone() because it's inefficient - probably a micro optimization though.
         match self.token().clone() {
             NumLiteral(value) => {
-                self.consume(NumLiteral(0.0));
+                self.consume(NumLiteral(0.0))?;
 
-                Box::new(Node::Number(value))
+                Ok(Box::new(Node::Number(value)))
             }
 
             NameLiteral(value) => match self.peek() {
                 Some(OpenParen) => {
-                    self.consume(NameLiteral(String::new()));
-                    self.consume(OpenParen);
+                    self.consume(NameLiteral(String::new()))?;
+                    self.consume(OpenParen)?;
                     let func = *self
                         .identifiers
                         .get_func(&value)
-                        .expect("function is valid");
-                    let arg = self.get_expression();
-                    self.consume(CloseParen);
-                    Box::new(Node::FunctionCall { func, arg })
+                        .ok_or_else(|| format!("Function \"{}\" does not exist.", &value))?;
+                    let arg = self.get_expression()?;
+                    self.consume(CloseParen)?;
+                    Ok(Box::new(Node::FunctionCall { func, arg }))
                 }
 
                 _ => {
-                    self.consume(NameLiteral(String::new()));
+                    self.consume(NameLiteral(String::new()))?;
                     let constant = *self
                         .identifiers
                         .get_constant(&value)
-                        .expect("constant is valid");
-                    Box::new(Node::Number(constant))
+                        .ok_or_else(|| format!("Constant \"{}\" does not exist.", &value))?;
+                    Ok(Box::new(Node::Number(constant)))
                 }
             },
 
             OpenParen => {
-                self.consume(OpenParen);
-                let expression = self.get_expression();
-                self.consume(CloseParen);
+                self.consume(OpenParen)?;
+                let expression = self.get_expression()?;
+                self.consume(CloseParen)?;
 
-                expression
+                Ok(expression)
             }
 
             MinusSign => {
-                self.consume(MinusSign);
-                let factor = self.get_factor();
+                self.consume(MinusSign)?;
+                let factor = self.get_factor()?;
 
-                Box::new(Node::UnaryOp {
+                Ok(Box::new(Node::UnaryOp {
                     op_type: UnaryOpType::Negate,
                     operand: factor,
-                })
+                }))
             }
 
-            _ => {
-                panic!("Expected (+/-) number or opening parentheses.")
-            }
+            _ => Err("Expected (+/-) number or opening parentheses.".into()),
         }
     }
 
-    fn get_power(&mut self) -> Box<Node> {
-        let mut factor = self.get_factor();
+    fn get_power(&mut self) -> NodeResult {
+        let mut factor = self.get_factor()?;
 
         while *self.token() == PowerSign {
-            self.consume(PowerSign);
+            self.consume(PowerSign)?;
             factor = Box::new(Node::BinaryOp {
                 op_type: BinaryOpType::Power,
                 lhs: factor,
-                rhs: self.get_factor(),
+                rhs: self.get_factor()?,
             });
         }
 
-        factor
+        Ok(factor)
     }
 
-    fn get_term(&mut self) -> Box<Node> {
-        let mut power = self.get_power();
+    fn get_term(&mut self) -> NodeResult {
+        let mut power = self.get_power()?;
 
         while match self.token() {
             TimesSign => {
-                self.consume(TimesSign);
+                self.consume(TimesSign)?;
                 power = Box::new(Node::BinaryOp {
                     op_type: BinaryOpType::Multiply,
                     lhs: power,
-                    rhs: self.get_power(),
+                    rhs: self.get_power()?,
                 });
                 true
             }
 
             DivideSign => {
-                self.consume(DivideSign);
+                self.consume(DivideSign)?;
                 power = Box::new(Node::BinaryOp {
                     op_type: BinaryOpType::Divide,
                     lhs: power,
-                    rhs: self.get_power(),
+                    rhs: self.get_power()?,
                 });
                 true
             }
@@ -190,29 +191,29 @@ impl<'a> Parser<'a> {
             _ => false,
         } {}
 
-        power
+        Ok(power)
     }
 
-    pub fn get_expression(&mut self) -> Box<Node> {
-        let mut term = self.get_term();
+    pub fn get_expression(&mut self) -> NodeResult {
+        let mut term = self.get_term()?;
 
         while match self.token() {
             PlusSign => {
-                self.consume(PlusSign);
+                self.consume(PlusSign)?;
                 term = Box::new(Node::BinaryOp {
                     op_type: BinaryOpType::Add,
                     lhs: term,
-                    rhs: self.get_term(),
+                    rhs: self.get_term()?,
                 });
                 true
             }
 
             MinusSign => {
-                self.consume(MinusSign);
+                self.consume(MinusSign)?;
                 term = Box::new(Node::BinaryOp {
                     op_type: BinaryOpType::Subtract,
                     lhs: term,
-                    rhs: self.get_term(),
+                    rhs: self.get_term()?,
                 });
                 true
             }
@@ -220,6 +221,6 @@ impl<'a> Parser<'a> {
             _ => false,
         } {}
 
-        term
+        Ok(term)
     }
 }

@@ -24,7 +24,7 @@ pub fn calculate(
             }
 
             let mut parser = Parser::new(tokens, identifiers);
-            let node = parser.get_expression();
+            let node = parser.get_expression()?;
             if config.debug {
                 println!("{:?}", node);
             }
@@ -45,7 +45,7 @@ mod tests {
     fn run_default(expression: &str) -> Result<f64, String> {
         crate::calculate(
             expression,
-            &Identifiers::get(&Config::default()),
+            &Identifiers::generate(&Config::default()),
             &Config::default(),
         )
     }

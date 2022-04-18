@@ -12,8 +12,8 @@ pub struct Identifiers {
 static DEG_TO_RAD: f64 = f64::consts::PI / 180.0;
 
 impl Identifiers {
-    pub fn get(config: &Config) -> Self {
-        let mut it = Identifiers {
+    pub fn generate(config: &Config) -> Self {
+        let mut it = Self {
             funcs: HashMap::new(),
             constants: HashMap::new(),
         };
