@@ -11,6 +11,8 @@ pub enum Token {
 
     NumLiteral(f64),
     NameLiteral(String), // Function or constant name
+
+    End,
 }
 
 use Token::*;
@@ -73,6 +75,8 @@ pub fn tokenize(expression: &str) -> Result<Vec<Token>, String> {
             }
         });
     }
+
+    tokens.push(End);
 
     Ok(tokens)
 }

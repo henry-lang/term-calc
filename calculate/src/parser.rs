@@ -145,7 +145,7 @@ impl<'a> Parser<'a> {
                 }))
             }
 
-            _ => Err("Expected (+/-) number or opening parentheses.".into()),
+            _ => Err("Expected expression.".into()),
         }
     }
 
