@@ -52,7 +52,7 @@ pub fn tokenize(expression: &str) -> Result<Vec<Token>, String> {
                         Ok(num) => NumLiteral(num),
                         Err(_) => {
                             return Err(format!(
-                                "invalid number {}",
+                                "Invalid number {}.",
                                 filtered[idx..end_idx].to_owned()
                             ))
                         }
@@ -70,7 +70,7 @@ pub fn tokenize(expression: &str) -> Result<Vec<Token>, String> {
 
                     NameLiteral(value)
                 } else {
-                    return Err(format!("unexpected character {}", c));
+                    return Err(format!("Unexpected character {}.", c));
                 }
             }
         });
