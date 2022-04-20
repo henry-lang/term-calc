@@ -1,5 +1,5 @@
 use calculate::*;
-use web_sys::{console::log_1, HtmlInputElement};
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 enum CalculatorMessage {
@@ -15,7 +15,6 @@ struct Calculator {
 
 impl Component for Calculator {
     type Message = CalculatorMessage;
-
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
@@ -44,9 +43,7 @@ impl Component for Calculator {
         let link = ctx.link();
 
         let oninput = link.callback(|e: InputEvent| {
-            let value = e.target_unchecked_into::<HtmlInputElement>().value();
-            log_1(&value.clone().into());
-            TextUpdate(value)
+            TextUpdate(e.target_unchecked_into::<HtmlInputElement>().value())
         });
 
         match &self.value {

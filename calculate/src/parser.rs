@@ -86,11 +86,7 @@ impl<'a> Parser<'a> {
                 self.current += 1
             }
         } else {
-            return Err(format!(
-                "\x1b[31mExpected {:?}, found {:?}\x1b[0m",
-                token,
-                self.token()
-            ));
+            return Err(format!("Expected {:?}, found {:?}.", token, self.token()));
         }
         Ok(())
     }
