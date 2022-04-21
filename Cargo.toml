@@ -19,3 +19,7 @@ members = [
     "term",
     "web"
 ]
+
+[profile.release]
+lto = true
+strip = true
