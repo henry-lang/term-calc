@@ -3,6 +3,8 @@ use std::{
     path::PathBuf,
 };
 
+use ansi_term::Color::{Red, White};
+
 use calculate::{calculate, Config, Identifiers};
 
 fn main() -> io::Result<()> {
@@ -27,9 +29,15 @@ fn main() -> io::Result<()> {
         if expression.trim() == "exit" {
             break;
         }
+
         match calculate(&expression, &identifiers, &config) {
             Ok(value) => println!("{}", value),
-            Err(msg) => println!("Error: {}", msg),
+            Err(msg) => println!(
+                "{}{}{}",
+                Red.bold().paint("error"),
+                White.bold().paint(": "),
+                msg
+            ),
         }
     }
 
