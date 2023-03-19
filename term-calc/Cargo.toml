@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 calculate = {path = "../calculate"}
-home = "0.5.3"
+home = "0.5.4"
 ansi_term = "0.12.1"

@@ -1,5 +1,5 @@
 use crate::{
-    identifiers::{Function, Identifiers},
+    identifiers::{Context, Function},
     tokenizer::Token::{self, *},
 };
 
@@ -54,13 +54,13 @@ pub enum Node {
 pub struct Parser<'a> {
     current: usize,
     tokens: Vec<Token>,
-    identifiers: &'a Identifiers,
+    identifiers: &'a Context,
 }
 
 type NodeResult = Result<Box<Node>, String>;
 
 impl<'a> Parser<'a> {
-    pub fn new(tokens: Vec<Token>, identifiers: &'a Identifiers) -> Self {
+    pub fn new(tokens: Vec<Token>, identifiers: &'a Context) -> Self {
         Self {
             current: 0,
             tokens,

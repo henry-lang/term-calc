@@ -5,20 +5,20 @@ use std::{
 
 use ansi_term::Color::{Red, White};
 
-use calculate::{calculate, Config, Identifiers};
+use calculate::{calculate, Config, Context};
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
     let config = Config::load(
         [
             home::home_dir().expect("home directory"),
-            "term-calc.config.toml".into(),
+            ".term-calc.toml".into(),
         ]
         .iter()
         .collect::<PathBuf>(),
     );
 
-    let identifiers = Identifiers::generate(&config);
+    let identifiers = Context::create(&config);
 
     loop {
         print!("calc > ");

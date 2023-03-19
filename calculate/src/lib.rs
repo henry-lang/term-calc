@@ -5,16 +5,12 @@ mod tokenizer;
 mod traverse;
 
 pub use config::{Config, Mode};
-pub use identifiers::Identifiers;
+pub use identifiers::Context;
 use parser::Parser;
 use tokenizer::tokenize;
 use traverse::traverse;
 
-pub fn calculate(
-    expression: &str,
-    identifiers: &Identifiers,
-    config: &Config,
-) -> Result<f64, String> {
+pub fn calculate(expression: &str, identifiers: &Context, config: &Config) -> Result<f64, String> {
     let tokens = tokenize(expression);
 
     match tokens {
@@ -39,13 +35,13 @@ pub fn calculate(
 #[cfg(test)]
 mod tests {
     use crate::Config;
-    use crate::Identifiers;
+    use crate::Context;
     use std::f64;
 
     fn run_default(expression: &str) -> Result<f64, String> {
         crate::calculate(
             expression,
-            &Identifiers::generate(&Config::default()),
+            &Context::create(&Config::default()),
             &Config::default(),
         )
     }

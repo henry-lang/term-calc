@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-yew = "0.19.3"
-web-sys = { version = "0.3", features = ["InputEvent"] }
-stylist = "0.10"
-calculate = {path = "../calculate"}
+yew = { version = "0.20.0", default-features = false, features = ["csr"] }
+web-sys = { version = "0.3.61", features = ["InputEvent"] }
+calculate = { path = "../calculate" }

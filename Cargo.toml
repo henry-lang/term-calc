@@ -1,6 +1,6 @@
 [workspace]
 members = [
     "calculate",
-    "term",
-    "web"
+    "term-calc",
+    "web-calc"
 ]

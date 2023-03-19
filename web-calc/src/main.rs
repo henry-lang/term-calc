@@ -1,6 +1,6 @@
-use calculate::*;
-use web_sys::HtmlInputElement;
-use yew::prelude::*;
+use calculate::{calculate, Config, Context as CalculatorContext, Mode};
+use web_sys::{HtmlInputElement, InputEvent};
+use yew::{html, Component, Context, Html, TargetCast};
 
 enum CalculatorMessage {
     TextUpdate(String),
@@ -9,7 +9,7 @@ use CalculatorMessage::*;
 
 struct Calculator {
     value: Result<f64, String>,
-    identifiers: Identifiers,
+    context: CalculatorContext,
     config: Config,
 }
 
@@ -26,14 +26,14 @@ impl Component for Calculator {
         Self {
             value: Ok(0f64),
             config,
-            identifiers: Identifiers::generate(&config),
+            context: CalculatorContext::create(&config),
         }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             TextUpdate(expression) => {
-                self.value = calculate(&expression, &self.identifiers, &self.config);
+                self.value = calculate(&expression, &self.context, &self.config);
                 true
             }
         }
@@ -69,5 +69,5 @@ impl Component for Calculator {
 }
 
 fn main() {
-    yew::start_app::<Calculator>();
+    yew::Renderer::<Calculator>::new().render();
 }

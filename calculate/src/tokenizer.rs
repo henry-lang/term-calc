@@ -19,7 +19,7 @@ use Token::*;
 
 pub fn tokenize(expression: &str) -> Result<Vec<Token>, String> {
     let filtered = expression.split_whitespace().collect::<String>();
-    let mut tokens = Vec::<Token>::new();
+    let mut tokens = Vec::new();
 
     let mut iter = filtered.chars().enumerate().peekable();
     while let Some((idx, c)) = iter.next() {
